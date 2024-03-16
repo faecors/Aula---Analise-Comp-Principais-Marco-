@@ -1,0 +1,1063 @@
+\documentclass{beamer}
+
+\mode<presentation>{
+\usetheme{Dresden}
+\setbeamercovered{transparent}
+\usecolortheme{lsc}
+}
+
+\mode<handout>{
+  % tema simples para ser impresso
+  \usepackage[bar]{beamerthemetree}
+  % Colocando um fundo cinza quando for gerar transparências para serem impressas
+  % mais de uma transparência por página
+  \beamertemplatesolidbackgroundcolor{black!5}
+}
+
+\usepackage{amsmath,amssymb}
+\usepackage{mathtools}
+\usepackage{mathtools}
+\usepackage[brazil]{varioref}
+\usepackage[english,brazil]{babel}
+\usepackage[utf8]{inputenc}
+%\usepackage[latin1]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{colortbl}
+\usepackage{textpos}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz, tkz-euclide}
+\usepackage{animate}
+
+% Transpose Conjugado
+\newcommand*{\matr}[1]{\mathbfit{#1}}
+\newcommand*{\tran}{^{\mkern-1.5mu\mathsf{T}}}
+\newcommand*{\conj}[1]{\overline{#1}}
+\newcommand*{\hermconj}{^{\mathsf{H}}}
+
+\newcommand{\PR}[1]{\ensuremath{\left[#1\right]}}
+\newcommand{\PC}[1]{\ensuremath{\left(#1\right)}}
+
+
+\beamertemplatetransparentcovereddynamic
+
+\title[Análise de Componentes Principais]{Análise de Componentes Principais (ACP):}
+\vspace{0.1cm}
+\subtitle{ uma breve introdução \\
+\vspace{0.3cm}
+Rafael Pentiado Poerschke}
+\author[POERSCHKE, Rafael P.]{%
+  Econometria II \inst{1} }
+  \institute[UFSM]{
+  \inst{1}%
+     Centro de Ciências Sociais e Humanas (CCSH)\\
+     Universidade Federal de Santa Maria (UFSM)}
+
+% Se comentar a linha abaixo, irá aparecer a data quando foi compilada a apresentação  
+\date{23 de março de 2024}
+
+\setbeamertemplate{page number in head/foot}[framenumber]
+
+\pgfdeclareimage[height=1cm]{inf}{figs/CienciaDaComputacao.png}
+
+% pode-se colocar o LOGO assim
+\logo{\pgfuseimage{inf}}
+
+\AtBeginSection[]{
+  \begin{frame}<beamer>
+    \frametitle{Roteiro}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\section{Referências}
+\logo{}
+\frame{
+    \frametitle{Referências}
+    \begin{itemize}
+    \item Referências Principais
+    \vspace{0.2cm}
+    \begin{itemize}
+	\begin{tiny}
+        
+       \item JOLLIFFE, Ian T. (1990). \textbf{Principal component analysis}: a beginner's guide—I. Introduction and application. Weather, v. 45, n. 10, p. 375-382.
+    
+    
+ \vspace{0.2cm}
+       \item JOHNSON, R. A.; WICHERN, D. W. and others. (2002) \textit{\textbf{Applied multivariate statistical analysis}}, Prentice hall Upper Saddle River, NJ.
+\vspace{0.2cm}
+\item
+FERREIRA, Daniel Furtado. (2008). \textbf{Estatística multivariada}. Lavras: Editora Ufla.
+\vspace{0.2cm}
+\item BIBBY, Ian L.; MARDIA, K. V.; KENT, John. (1993). \textbf{Multivariate shape analysis}. Sankhyā: The Indian Journal of Statistics, Series A, p. 460-480.
+	\end{tiny} \end{itemize}
+ 
+\vspace{0.2cm}
+\item Referências Complementares
+	\vspace{0.2cm}
+	\begin{itemize}
+	\begin{tiny}
+	
+\item  ELDÉN, Lars. (2019). \textbf{Matrix methods in data mining and pattern recognition}. Society for Industrial and Applied Mathematics.
+\vspace{0.2cm}
+\item STRANG, G. (2019). \textit{\textbf{Linear algebra and learning from data}}, 1ed. SIAM.
+\vspace{0.2cm}
+\item OLVER, Peter ; SHAKIBAN, Shakiban. (2018) \textbf{Applied Linear Algebra}. Springer 
+	
+	\end{tiny} \end{itemize}
+    
+    \end{itemize}
+}
+
+
+
+\section{Introdução}
+
+\frame{
+	\frametitle{Componentes Principais: Ideia principal/motivação}
+\textbf{ Dados em elevada dimensão:}
+\begin{itemize}
+         \item Histórico das 400 empresas na B3
+         \begin{itemize}
+            \item Categorias?
+\end{itemize}
+\vspace{0.3cm}
+         \item Imagens: 9x13 cm	$\implies$	1050x1500 pixels
+         \begin{itemize}
+            \item Matriz menor? 
+\end{itemize}
+\vspace{0.3cm}
+        \item Histórico de buscas na Internet
+         \begin{itemize}
+            \item \textit{Ranqueamento} de páginas.
+\end{itemize}
+      \end{itemize}
+
+}
+
+\frame{
+	\frametitle{Componentes Principais: Motivação}
+\textbf{ Dados em elevada dimensão:}
+\begin{itemize}
+         \item Histórico das 400 Empresas na B3
+         \begin{itemize}
+            \item Categorias?
+\end{itemize}
+\vspace{0.3cm}
+         \item Imagens: 9x13 cm	$\implies$	1050x1500 pixels
+         \begin{itemize}
+            \item Matriz menor? \textcolor{red}{Sistema RGB}.
+\end{itemize}
+\vspace{0.3cm}
+        \item Histórico de buscas na Internet
+         \begin{itemize}
+            \item \textit{Ranqueamento} de páginas.
+\end{itemize}
+      \end{itemize}
+
+}
+
+
+\frame{
+	\frametitle{Componentes Principais: Motivação (780 x 960 pixels)}
+\center
+\pgfdeclareimage[height=6.8cm]{totalVcores}{figs/galax.png}
+    %TODO fig colectInt
+    \pgfuseimage{totalVcores}
+}
+
+
+\logo{}
+\frame{
+    \frametitle{Questões centrais}
+      \begin{itemize}
+         \item \textbf{Análise de Componentes Principais}: O que é? De onde vem? Como funciona?
+         \vspace{0.3cm}
+         \onslide<2-3>{\item \textbf{Decomposição de Matrizes}: Como o software executa?}
+\vspace{0.3cm}
+         \onslide<3>{\item \textbf{Economia do Desenvolvimento}: Aplicação da ACP.}
+         
+      \end{itemize}
+}
+
+\frame{
+\frametitle{Análise de Componentes Principais}
+\begin{itemize}
+    \item \textbf{O que é} (para a Matemática): é uma \underline{transformação linear};
+        \begin{itemize}
+            \onslide<2-5>\item \textbf{Ingredientes}: ortogonalidade e decomposição em autovalores.
+        \end{itemize}
+\vspace{0.3cm}
+
+    \onslide<3-5>\item \textbf{De onde vem}: Pearson (1901) e Hotelling (1933);
+
+\vspace{0.3cm}
+         \onslide<4-5>\item 
+\textbf{Para que serve}: possibilita a \textcolor{red}{redução da dimensão} inicial de dados. 
+    \vspace{0.3cm}
+    \onslide<5> \item \textbf{Como faz}: APC é um \underline{modelo linear}. 
+\end{itemize}
+}
+
+
+\section{Aplicação}
+
+\frame{
+\frametitle{Problemas em Economia: Problema 1}
+Kageyama, Angela and Leone, Eugenia Troncoso. \textbf{Uma tipologia dos municípios paulistas com base em indicadores sociodemográficos}. Campinas: UNICAMP/IE, 1999. 
+
+}
+
+\frame{
+\frametitle{Problemas em Economia: Problema 1}
+\begin{itemize}
+    \item Kageyama e Leone (1999) buscaram construir uma \textbf{tipologia de economias regionais} em um conjunto de municípios  (características sociais e econômicas). 
+     \vspace{0.3cm}
+    \item Para as autoras, a maioria dos estudos à época consistiam de \textbf{análises em profundidade} de localidades específicas: 
+    \begin{itemize}
+    \item  \textbf{Objetivo}: geração de unidades territoriais maiores e mais homogêneas para o estudo das famílias agrícolas. 
+    \end{itemize}
+\end{itemize}
+}
+
+
+
+\frame{
+\frametitle{Problemas em Economia: Problema 1}
+\begin{itemize}
+    \item
+Os resultados mostraram \textbf{cinco regiões} relativamente homogêneas no estado de São Paulo: 
+
+\begin{itemize}
+\setbeamertemplate{itemize items}[circle]
+    \item rural\textit{ muito} pobre;
+    \item rural \textit{pobre};
+    \tiem \textit{intermediária};
+    \item \textit{urbano} em expansão; e
+    \item \textit{urbano} denso. 
+    \end{itemize}
+ \vspace{0.3cm}
+\item Essas \textbf{tipificações} foram descritas em termos de: 
+\begin{itemize}
+\setbeamertemplate{itemize items}[circle]
+\item renda, 
+\item população,
+\item produção agrícola locais.
+\end{itemize}
+\end{itemize}
+}
+
+\frame{
+\frametitle{Problemas em Economia: Problema 2}
+Schneider, Sérgio; Waquil, Paulo D. Caracterização socioeconômica dos municípios gaúchos e desigualdades regionais. \textbf{Revista de Economia e Sociologia Rural}. n.3, v.39. 2001. pp. 117-142.
+\begin{itemize}
+\vspace{0.3cm}
+    \item Os autores classificaram o Rio Grande do Sul em \textbf{cinco grupos} homogêneos de municípios, sendo que dois deles tinham em comum a pobreza rual e a degradação dos recursos naturais. 
+\vspace{0.3cm}
+    \item \textbf{Conclusão}: descartaram a ideia de que o estado podia ser dividido em duas partes, isto é, entre uma \textit{metade sul} \textbf{mais atrasada}, e o \textit{norte} \textbf{desenvolvido}.
+    
+\end{itemize}
+ver também:  \href{https://seer.ufrgs.br/index.php/AnaliseEconomica/article/view/10873}{Freitas et al., Analisando a modernização da agropecuária gaúcha: uma aplicação de análise fatorial e cluster.}
+}
+
+\frame{
+\frametitle{Problemas em Economia: Problema 3}
+\vspace{0.3cm}
+ Em um universo de \underline{127 municípios}, agregados em 8 COREDEs predominantemente \textbf{agropecuários}, questiona-se \textcolor{red}{o quão homogêneo é} esse grupo, isto é, \textbf{em que medida} \underline{a agregação por contiguidade}, garante a homogeneidade dos COREDEs.
+}
+
+\frame{
+    \frametitle{COREDEs: Origem}
+      
+      \begin{block}{Definição: Conselhos Regionais de Desenvolvimento}
+    Os Conselhos Regionais de Desenvolvimento – COREDEs, criados oficialmente pela Lei 10.283 de 17 de outubro de 1994, são \underline{um fórum de discussão} para a promoção de políticas e ações que visam o desenvolvimento regional.
+    \end{block}
+    
+Temos \textbf{28} COREDEs e \textbf{497} municípios no estado - começou com 21.
+
+}
+
+
+\frame{
+	\frametitle{COREDEs: Localização}
+\center
+    \pgfdeclareimage[height=6.8cm]{totalVcores}{figs/COREDE.png}
+    %TODO fig colectInt
+    \pgfuseimage{totalVcores}
+}
+
+\frame{
+    \frametitle{COREDEs Agropecuários}
+
+\center
+    \pgfdeclareimage[height=6.5cm]{totalVcores}{figs/result1.png}
+    %TODO fig colectInt
+    \pgfuseimage{totalVcores}
+}
+
+\frame{
+    \frametitle{Grupos - COREDEs Agropecuários}
+
+\center
+    \pgfdeclareimage[height=6cm]{totalVcores}{figs/KMEAN.png}
+    %TODO fig colectInt
+    \pgfuseimage{totalVcores}
+}
+
+\frame{
+    \frametitle{Grupos - COREDEs Agropecuários}
+
+\center
+    \pgfdeclareimage[height=6.8cm]{totalVcores}{figs/result2.png}
+    %TODO fig colectInt
+    \pgfuseimage{totalVcores}
+}
+
+\logo{}
+\section{Método}
+\frame{
+\frametitle{Componentes Principais}
+A Análise de Componentes Principais é um problema no qual busca-se \underline{estimar um subespaço de \textcolor{red}{dimensão inferior}} $m \leq p$ de um conjunto de pontos em um espaço de dimensão maior $\mathbb{R}^{p}$ dispostos em uma matriz $\mathbf{X}=[\mathbf{X}_{1},\mathbf{X}_{2},\cdots,\mathbf{X}_{p}]\tran$ formada por $p$ variáveis aleatórias \textbf{correlacionadas entre si}.
+}
+
+\frame{
+\frametitle{Componentes Principais}
+
+Esse problema pode ser modelado como uma questão \textbf{estatística} ou \textbf{geométrica}. Existe uma terceira abordagem, no qual ACP é vista como um problema de \textbf{aproximação} de uma matriz de \textbf{menor posto} em relação original.
+}
+
+\frame{
+	\frametitle{O Problema da ACP: abordagem geométrica}
+\center
+\begin{tikzpicture}[scale=0.71,line width=1pt]
+        
+    \draw[gray!50,very thin] (-5,-4) grid (5,4);
+    \draw[thick,-latex] (-5,0) -- (5,0) node [below left] {x};
+    \draw[thick,-latex] (0,-4) -- (0,4) node [below left] {y};
+
+    \foreach \x in {-4,...,-1,1,2,3,4} \draw (\x,2pt) --++ (0,-4pt) node [below] {\x};
+    \foreach \y in {-3,...,-1,1,2,3} \draw (2pt,\y) --++ (-4pt,0) node [left] {\y};
+
+\fill[blue](1.72,1.5)  circle[radius=2pt];
+    % Adicione os pontos de correlação positiva
+    \fill[blue] (1,1) circle[radius=2pt];
+    \fill[blue] (4.2,2) circle[radius=2pt];
+    \fill[blue] (3,2) circle[radius=2pt];
+    \fill[blue] (4,1.7) circle[radius=2pt];
+    \fill[blue] (2.5,2.4) circle[radius=2pt];
+    \fill[blue] (2.5,0.7) circle[radius=2pt];
+    \fill[blue] (1.5,0.7) circle[radius=2pt];
+    \fill[blue] (4.5,2.9) circle[radius=2pt];
+    \fill[blue] (3.8,2) circle[radius=2pt];
+    \fill[blue] (4.2,2.5) circle[radius=2pt];
+    \fill[blue] (3.5,1.7) circle[radius=2pt];
+    \fill[blue] (3.4,1.2) circle[radius=2pt];
+    \fill[blue] (1.7,0.7) circle[radius=2pt];
+    \fill[blue] (0.5,0.7) circle[radius=2pt];
+    \fill[blue] (0.9,0.2) circle[radius=2pt];
+    \fill[blue] (2.6,1.8) circle[radius=2pt];
+    \fill[blue] (-1,-1) circle[radius=2pt];
+    \fill[blue] (2.1,1.5) circle[radius=2pt];
+    \fill[blue] (2.1,0.8) circle[radius=2pt];
+    \fill[blue] (3,1) circle[radius=2pt];
+    \fill[blue] (-2,-2) circle[radius=2pt];
+    \fill[blue] (-2,-0.7) circle[radius=2pt];
+    \fill[blue] (-3,-2) circle[radius=2pt];
+    \fill[blue] (-1.3,-0.4) circle[radius=2pt];
+    \fill[blue] (-2.3,-1.25) circle[radius=2pt];
+    \fill[blue] (-0.2,-0.25) circle[radius=2pt];
+    \fill[blue] (-0.52,-0.45) circle[radius=2pt];
+    \fill[blue] (-3,-1) circle[radius=2pt];
+    \fill[blue] (-1.2,-1.5) circle[radius=2pt];
+    \fill[blue] (-4,-1.25) circle[radius=2pt];
+    \fill[blue] (-4.1,-1.35) circle[radius=2pt];
+    \fill[blue] (-4.1,-2.35) circle[radius=2pt];
+    \fill[blue] (-4.3,-2) circle[radius=2pt];
+    \fill[blue] (-4.4,-2.4) circle[radius=2pt];
+    \fill[blue] (-3.5,-1.65) circle[radius=2pt];
+    \fill[blue] (-2.5,-1.65) circle[radius=2pt];
+     \fill[blue] (-1.35,-1.2) circle[radius=2pt];
+      \fill[blue] (-1.75,-1.45) circle[radius=2pt];
+      \fill[blue] (-2.75,-0.85) circle[radius=2pt];
+      \fill[blue] (-1,0.85) circle[radius=2pt];
+      \fill[blue] (-0.7,0.35) circle[radius=2pt];
+      \fill[blue] (-0.3,0.75) circle[radius=2pt];
+      \fill[blue] (0.7,-0.35) circle[radius=2pt];
+      \fill[blue] (0.5,-0.55) circle[radius=2pt];
+\caption{Eixos Coordenados} 
+\end{tikzpicture}
+}
+
+\frame{
+	\frametitle{O Problema da ACP: abordagem geométrica}
+\center
+\begin{tikzpicture}[scale=0.71,line width=1pt]
+        
+    \draw[gray!50,very thin] (-5,-4) grid (5,4);
+    \draw[thick,-latex] (-5,0) -- (5,0) node [below left] {x};
+    \draw[thick,-latex] (0,-4) -- (0,4) node [below left] {y};
+
+    \foreach \x in {-4,...,-1,1,2,3,4} \draw (\x,2pt) --++ (0,-4pt) node [below] {\x};
+    \foreach \y in {-3,...,-1,1,2,3} \draw (2pt,\y) --++ (-4pt,0) node [left] {\y};
+
+        
+    \begin{scope}
+        \clip (-5,-4) rectangle (5,4);  
+        \draw[line width=1pt,olive,domain=(-5:5)] plot (\x,-2*\x);
+        \node[olive, above] at (-1.4,3) {$Z_{2}$};
+            
+        \draw[line width=1pt,blue!50!cyan,domain=(-5:5)] plot (\x,0.5*\x);      
+        \node[blue!50!cyan, above left] at (5.2,1.5) {$Z_{1}$};
+        
+    \end{scope}
+
+    \fill[blue](1.72,1.5)  circle[radius=2pt];
+    
+    
+   
+    % Adicione os pontos de correlação positiva
+    \fill[blue] (1,1) circle[radius=2pt];
+    \fill[blue] (4.2,2) circle[radius=2pt];
+    \fill[blue] (3,2) circle[radius=2pt];
+    \fill[blue] (4,1.7) circle[radius=2pt];
+    \fill[blue] (2.5,2.4) circle[radius=2pt];
+    \fill[blue] (2.5,0.7) circle[radius=2pt];
+    \fill[blue] (1.5,0.7) circle[radius=2pt];
+    \fill[blue] (4.5,2.9) circle[radius=2pt];
+    \fill[blue] (3.8,2) circle[radius=2pt];
+    \fill[blue] (4.2,2.5) circle[radius=2pt];
+    \fill[blue] (3.5,1.7) circle[radius=2pt];
+    \fill[blue] (3.4,1.2) circle[radius=2pt];
+    \fill[blue] (1.7,0.7) circle[radius=2pt];
+    \fill[blue] (0.5,0.7) circle[radius=2pt];
+    \fill[blue] (0.9,0.2) circle[radius=2pt];
+    \fill[blue] (2.6,1.8) circle[radius=2pt];
+    \fill[blue] (-1,-1) circle[radius=2pt];
+    \fill[blue] (2.1,1.5) circle[radius=2pt];
+    \fill[blue] (2.1,0.8) circle[radius=2pt];
+    \fill[blue] (3,1) circle[radius=2pt];
+    \fill[blue] (-2,-2) circle[radius=2pt];
+    \fill[blue] (-2,-0.7) circle[radius=2pt];
+    \fill[blue] (-3,-2) circle[radius=2pt];
+    \fill[blue] (-1.3,-0.4) circle[radius=2pt];
+    \fill[blue] (-2.3,-1.25) circle[radius=2pt];
+    \fill[blue] (-0.2,-0.25) circle[radius=2pt];
+    \fill[blue] (-0.52,-0.45) circle[radius=2pt];
+    \fill[blue] (-3,-1) circle[radius=2pt];
+    \fill[blue] (-1.2,-1.5) circle[radius=2pt];
+    \fill[blue] (-4,-1.25) circle[radius=2pt];
+    \fill[blue] (-4.1,-1.35) circle[radius=2pt];
+    \fill[blue] (-4.1,-2.35) circle[radius=2pt];
+    \fill[blue] (-4.3,-2) circle[radius=2pt];
+    \fill[blue] (-4.4,-2.4) circle[radius=2pt];
+    \fill[blue] (-3.5,-1.65) circle[radius=2pt];
+    \fill[blue] (-2.5,-1.65) circle[radius=2pt];
+     \fill[blue] (-1.35,-1.2) circle[radius=2pt];
+      \fill[blue] (-1.75,-1.45) circle[radius=2pt];
+      \fill[blue] (-2.75,-0.85) circle[radius=2pt];
+      \fill[blue] (-1,0.85) circle[radius=2pt];
+      \fill[blue] (-0.7,0.35) circle[radius=2pt];
+      \fill[blue] (-0.3,0.75) circle[radius=2pt];
+      \fill[blue] (0.7,-0.35) circle[radius=2pt];
+      \fill[blue] (0.5,-0.55) circle[radius=2pt];
+
+\end{tikzpicture}
+}
+
+\frame{
+	\frametitle{O Problema da ACP: abordagem geométrica}
+\center
+\begin{tikzpicture}[font=\sffamily\small]
+        
+    \draw[gray!50,very thin] (-5,-4) grid (5,4);
+    \draw[thick,-latex] (-5,0) -- (5,0) node [below left] {x};
+    \draw[thick,-latex] (0,-4) -- (0,4) node [below left] {y};
+
+    \foreach \x in {-4,...,-1,1,2,3,4} \draw (\x,2pt) --++ (0,-4pt) node [below] {\x};
+    \foreach \y in {-3,...,-1,1,2,3} \draw (2pt,\y) --++ (-4pt,0) node [left] {\y};
+   
+    \begin{scope}
+        \clip (-5,-4) rectangle (5,4);  
+        \draw[line width=1pt,olive,domain=(-5:5)] plot (\x,-2*\x);
+        \node[olive, above] at (-1.4,3) {$Z_{2}$};
+            
+        \draw[line width=1pt,blue!50!cyan,domain=(-5:5)] plot (\x,0.5*\x);      
+        \node[blue!50!cyan, above left] at (4.95,1.8) {$Z_{1}$};
+        
+        \draw[red, very thick,-latex] (0,0) -- (1,0.5) node [font=\tiny, below, rotate=27, yshift=0.08cm, pos=0.7] {$||\vec{u}_{1}||=1$};
+    \end{scope}
+
+%Coordenadas dos pontos e projecao
+%\coordinate (C) at (1.72,1.5);
+\coordinate (C) at (2.5,2.4);
+\coordinate (B) at (0,0);
+\coordinate (A) at (2.95,1.46);
+\node [dot] at (C) {};
+\node [dot] at (A) {};
+\node [dot] at (B) {};
+%triangulo preenchido
+\fill[gray, fill opacity=0.2] (B) -- (C) node [above, pos=0.996, opacity=1] {$x_{i}$} -- (A) node [right, pos=1.03, opacity=1] {$x_{i}^{\prime}$} -- cycle;
+%vetores ligando os pontos
+\draw[-, densely dashed] (A)node[above]{}--(C)node[left]{};
+%\draw[-] (C)--(B)node[right]{0};
+%\draw[-] (A)--(B);
+    \fill[blue] (1.72,1.5)  circle[radius=2pt];
+    \fill[red] (2.95,1.46)  circle[radius=2pt];
+    \draw[-triangle 45, thin, densely dashed] (0, 0) -- (2.5,2.4);
+\coordinate (Q) at($(B)!(C)!(A)$) ;
+\tkzMarkRightAngle[draw](C,Q,A);
+\tkzLabelAngle[pos=.18](C,Q,A){$\cdot$}
+%linhas com medidas
+\draw[|<->|] ($(B)!-7mm!90:(A)$)--node[font=\small, fill=white,sloped] {$\lambda u_{1}=\text{proj}_{\vec{u}_{1}}\vec{x_{i}}$} ($(A)!7mm!90:(B)$);
+\draw[|<->|] ($(A)!-5mm!90:(C)$)--node[font=\tiny, fill=white,sloped] {$||w||$} ($(C)!5mm!90:(A)$);
+\draw[|<->|] ($(C)!-5mm!90:(B)$)--node[font=\tiny, fill=white,sloped] {$||\vec{x}_{i}||$} ($(B)!5mm!90:(C)$);
+%quadrado do angulo
+    %\node[minimum size=2.2mm, inner sep=0pt, draw=black, 
+     %anchor=south west, rotate=-atan(1/0.499)] at (1.7,1.1) {};
+     %\fill[black] (2.79,1.52)  circle[radius=0.9pt];
+     %\draw[thin, densely dashed] (2, 1) -- (1.64, 1.68);
+
+    % Pontos de correlação positiva
+    \fill[blue] (1,1) circle[radius=2pt];
+    \fill[blue] (4.2,2) circle[radius=2pt];
+    \fill[blue] (3,2) circle[radius=2pt];
+    \fill[blue] (4,1.7) circle[radius=2pt];
+    \draw[red] (2.5,2.4) circle[radius=2pt];
+    \fill[blue] (2.5,0.7) circle[radius=2pt];
+    \fill[blue] (1.5,0.7) circle[radius=2pt];
+    \fill[blue] (4.5,2.9) circle[radius=2pt];
+    \fill[blue] (3.8,2) circle[radius=2pt];
+    \fill[blue] (4.2,2.5) circle[radius=2pt];
+    \fill[blue] (3.5,1.7) circle[radius=2pt];
+    \fill[blue] (3.4,1.2) circle[radius=2pt];
+    \fill[blue] (1.7,0.7) circle[radius=2pt];
+    \fill[blue] (0.5,0.7) circle[radius=2pt];
+    \fill[blue] (0.9,0.2) circle[radius=2pt];
+    \fill[blue] (2.6,1.8) circle[radius=2pt];
+    \fill[blue] (-1,-1) circle[radius=2pt];
+    \fill[blue] (2.1,1.5) circle[radius=2pt];
+    \fill[blue] (2.1,0.8) circle[radius=2pt];
+    \fill[blue] (3,1) circle[radius=2pt];
+    \fill[blue] (-2,-2) circle[radius=2pt];
+    \fill[blue] (-2,-0.7) circle[radius=2pt];
+    \fill[blue] (-3,-2) circle[radius=2pt];
+    \fill[blue] (-1.3,-0.4) circle[radius=2pt];
+    \fill[blue] (-2.3,-1.25) circle[radius=2pt];
+    \fill[blue] (-0.2,-0.25) circle[radius=2pt];
+    \fill[blue] (-0.52,-0.45) circle[radius=2pt];
+    \fill[blue] (-3,-1) circle[radius=2pt];
+    \fill[blue] (-1.2,-1.5) circle[radius=2pt];
+    \fill[blue] (-4,-1.25) circle[radius=2pt];
+    \fill[blue] (-4.1,-1.35) circle[radius=2pt];
+    \fill[blue] (-4.1,-2.35) circle[radius=2pt];
+    \fill[blue] (-4.3,-2) circle[radius=2pt];
+    \fill[blue] (-4.4,-2.4) circle[radius=2pt];
+    \fill[blue] (-3.5,-1.65) circle[radius=2pt];
+    \fill[blue] (-2.5,-1.65) circle[radius=2pt];
+     \fill[blue] (-1.35,-1.2) circle[radius=2pt];
+      \fill[blue] (-1.75,-1.45) circle[radius=2pt];
+      \fill[blue] (-2.75,-0.85) circle[radius=2pt];
+      \fill[blue] (-1,0.85) circle[radius=2pt];
+      \fill[blue] (-0.7,0.35) circle[radius=2pt];
+      \fill[blue] (-0.3,0.75) circle[radius=2pt];
+      \fill[blue] (0.7,-0.35) circle[radius=2pt];
+      \fill[blue] (0.5,-0.55) circle[radius=2pt];
+
+\end{tikzpicture}
+
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+      
+      \begin{block}{\textbf{Teorema}: Componentes Principais de Variáveis Aleatórias\footnote{A demonstração do teorema pode ser consultada em Jolliffe (1990).}}
+    Assuma que posto($\mathbf{S}_{X}) \geq m$. Então os primeiros $m$ componentes principais de uma variável aleatória multivariada $\mathbf{X}$, denotado por $w_{i}$ para $i=1,2,\dots, m$, são dados por
+$$\mathbf{w}_{i}=\mathbf{u}\tran_{i}\mathbf{X},$$
+onde $\{u_{i}\}^{m}_{i=1}$ são os $d$ autovetores de $\mathbf{S}_{X}=\mathbb{E}[\mathbf{X}\mathbf{X}\tran]$ associada com os $m$ \underline{maiores} autovalores $\{\lambda_{i}\}^{m}_{i=1}$. Além disso, $\lambda_{i}=\text{Var}(w_{i})$ para $i=1,2,\dots,m.$
+    \end{block}  
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+\textbf{Demonstração:}
+Seja $\mathbf{X}$ um vetor de $p$-variáveis aleatórias correlacionadas, com $\mathbf{X} \in \mathbb{R}^{p}$ e $\mathbf{u}_{i}$ é um vetor de $p$ constantes $u_{i1},u_{i2},\dots,u_{ip}$. Como objetivo, queremos preservar o máximo de informação possível em uma dimensão menor que a original, sendo a variância de $\mathbf{X}$ computada em $m$ Componentes Principais em que $m \leq p$, tal que $\mathbf{w}$ representa os $m$ componentes não correlacionados de $\mathbf{X}$ e $\mathbf{w} \in \mathbb{R}^{m}$. Assim,
+$$\mathbf{w}_{i}=\mathbf{u}\tran_{i}\mathbf{X} \in \mathbb{R}, \quad u_{i} \in \mathbb{R}^{p}, \quad i=1,2,\dots, m$$
+tal que a variância de $\mathbf{w}_{i}$ é maximizada sujeita a
+$$\mathbf{u}\tran_{i}\mathbf{u}_{i}=1 \quad \text{e} \quad \text{Var}(\mathbf{w}_{1}) \geq \text{Var}(\mathbf{w}_{2}) \geq \dots \text{Var}(\mathbf{w}_{m})>0.$$
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Primeiro,vamos assumir que $\mathbf{S}_{X}$ não possui autovalores repetidos. Por ser uma matriz com entradas reais e simétrica, esses autovalores são reais e seus autovetores associados formam um base em $\mathbb{R}^{p}$. Mais que isso, os autovalores são únicos (positivos), e os autovetores correspondentes são ortogonais entre si.
+
+Observe que para cada $\mathbf{u} \in \mathbb{R}^{p}$ nos temos que
+$$\text{Var}(u_{1}\tran \mathbf{X})=\tfrac{1}{n}\sum_{i=1}^{n}(u_{1}\tran x_{i}-u_{1}\tran \overline{x})^2.$$
+
+
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    
+
+Uma vez que os dados foram normalizados ao redor da média, a expressão se reduz a
+$$\text{Var}(u_{1}\tran \mathbf{X})=\frac{1}{n}\sum_{i=1}^{n}(u_{1}\tran x_{i})^2$$
+
+$$\text{Var}(\mathbf{u}\tran \mathbf{X})=\mathbb{E}[(\mathbf{u}\tran \mathbf{X})^{2}]=\mathbb{E}[\mathbf{u}\tran \frac{\mathbf{X}\mathbf{X}\tran}{2} \mathbf{u}]=\mathbf{u}\tran \mathbf{S}_{X}\mathbf{u}.$$
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Vamos assumir que o queremos projetar os dados em um espaço unidimensional. O componente principal correspondente a esse eixo será combinação linear das variáveis originais expressa por $\mathbf{u}\tran_{1}\mathbf{X}$, isto é:
+$$\mathbf{w}_{1}=\mathbf{u}\tran_{1}\mathbf{X}\,=\,u_{11}\mathbf{X}_{1}+\,u_{12}\mathbf{X}_{2}+\,\dots+\,u_{1p}\mathbf{X}_{p}\,;$$
+isto é
+\begin{gather*}
+w_{11}=\,u_{11}\mathbf{X}_{11}+\,u_{12}\mathbf{X}_{12}+\,\dots+\,u_{1p}\mathbf{X}_{1p}
+\\
+w_{21}=\,u_{11}\mathbf{X}_{21}+\,u_{12}\mathbf{X}_{22}+\,\dots+\,u_{1p}\mathbf{X}_{2p}
+\\
+\vdots \\ 
+w_{n1}=\,u_{11}\mathbf{X}_{n1}+\,u_{12}\mathbf{X}_{n2}+\,\dots+\,u_{1p}\mathbf{X}_{np}\,.
+\end{gather*}
+
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    
+Após, procuramos por um segundo componente, $\mathbf{u}\tran_{2}\mathbf{X}$, que não correlacionado com $\mathbf{u}\tran_{1}\mathbf{X}$ e tenha máxima variância, e assim sucessivamente até encontrarmos o $k$-ésimo estágio que possua máxima variância e ausência de correlação com $\mathbf{u}\tran_{1}\mathbf{X}, \mathbf{u}\tran_{2}\mathbf{X},\dots,\mathbf{u}\tran_{k-1}\mathbf{X}$.
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Para derivarmos os Componentes Principais, consideremos um primeiro $\mathbf{u}\tran_{1}\mathbf{X}$; o vetor $\mathbf{u}_{1}$ maximiza $\text{Var}(\mathbf{u}\tran_{1}\mathbf{X})=\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{1}$. Como foi supra-exposto, $\mathbf{u}\tran_{i}\mathbf{u}_{i}=1$ é assumido como restrição, e para solução fazemos uso do Lagrangiano. 
+
+Nesse sentido, tempos o problema de otimização condicionada dado por
+\begin{equation}
+  \begin{cases}
+  \max\limits_{\mathbf{u}_{1} \in \mathbb{R}^{p}} & (\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{1})\\
+    \text{sujeito a:} &||\mathbf{u}_{1}||=\mathbf{u}\tran_{1}\mathbf{u}_{1}=1.
+  \end{cases}
+\end{equation}
+
+Assim, para maximizar $\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{1}$
+sujeito a $\mathbf{u}\tran_{k}\mathbf{u}_{k}=1$, significa maximizar
+$$\mathcal{L}(\mathbf{S},\mathbf{u}_{1},\lambda_{1})=\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{1}-\lambda_{1}(\mathbf{u}\tran_{1}\mathbf{u}_{1}-1),$$
+onde $\lambda_{1} \in \mathbb{R}$ representa o multiplicador de Lagrange. 
+}
+
+\frame{
+\frametitle{Teorema de Lagrange}
+\begin{block}{\textbf{Teorema}: Método dos Multiplicadores de Lagrange\footnote{Uma demonstração pode ser encontrada em MARSDEN, Jerrold E.; TROMBA, Anthony. Vector calculus. Macmillan, 2003.}}
+Suponha que $f:U \subset \mathbb{R}^{n}\rightarrow \mathbb{R}$ e $g:U \subset \mathbb{R}^{n} \rightarrow \mathbb{R}$ são funções reais de classe $C^{1}$ no aberto $U \in \mathbb{R}^{n}$. Seja $\vec{x}_{0} \in U$ e $g(\vec{x}_{0})=c$, e seja $S$ o nível de $g$ ao valor $c$. Assuma que $\nabla g(\vec{x}_{0}) \neq \vec{0}$.
+
+Se $f|S$ ($f$ restrita a $S$), possui um local máximo ou mínimo em $S$ no ponto $\vec{x}_{0}$, então existe um número real $\lambda$ que 
+\begin{gather}
+\boxed{\nabla f(\vec{x}_{0})=\lambda \nabla g(\vec{x}_{0})}.
+\end{gather}
+\end{block}
+}
+
+\frame{
+\frametitle{Teorema de Lagrange: derivando matrizes}
+$g(\vec{x}_{0}):\mathbf{u}\tran \mathbf{u}=1$
+\vspace{0.5cm}
+\begin{align*}
+\mathbf{u}\tran \mathbf{u} 
+&= \begin{bmatrix} 
+       u_{1}, & u_{2}, & \dots, & u_{p} 
+   \end{bmatrix}
+   \begin{bmatrix*}[c]
+       u_{1} \\ u_{2} \\  \vdots \\ u_{p}
+   \end{bmatrix*} \\
+&= \begin{bmatrix} 
+       u_{1}^{2}+ u_{2}^{2}+\dots+u_{p}^{2}
+   \end{bmatrix}.
+\end{align*}
+}
+
+\frame{
+\frametitle{Teorema de Lagrange}
+Sendo assim, precisamos encontrar $\nabla g(\vec{x}_{0})$, tal que:
+
+\begin{align*}
+\frac{\partial}{\partial \mathbf{u}} \PC{\mathbf{u}\tran \mathbf{u}} =\begin{bmatrix*}[c]
+       \frac{\partial}{\partial u_{1}} \PC{\mathbf{u}\tran \mathbf{u}} \\ \frac{\partial}{\partial u_{2}} \PC{\mathbf{u}\tran \mathbf{u}} \\  \vdots \\ \frac{\partial}{\partial u_{p}} \PC{\mathbf{u}\tran \mathbf{u}}
+   \end{bmatrix*} 
+\end{align*}
+}
+
+\frame{
+\frametitle{Teorema de Lagrange}
+Efetuando a derivada, coordenada a coordenada, temos
+\begin{gather*}
+\frac{\partial}{\partial u_{1}} \PC{\mathbf{u}\tran \mathbf{u}} =2u_{1};\\
+\frac{\partial}{\partial u_{2}} \PC{\mathbf{u}\tran \mathbf{u}}  =2u_{2};\\
+\vdots \\
+\frac{\partial}{\partial u_{p}} \PC{\mathbf{u}\tran \mathbf{u}} =2u_{p}.
+\end{gather*}
+}
+
+\frame{
+\frametitle{Teorema de Lagrange}
+Montando o gradiente de $g(\vec{x}_{0})$ encontramos:
+
+\begin{align*}
+  \nabla (\mathbf{u}\tran \mathbf{u}) ={}& [2u_{1},\,2u_{2},\, \dots,\, 2u_{p}]\\
+  \\
+  ={}& 2[u_{1}\,,u_{2}\,,\dots,\,u_{p}]\\
+  \\
+  \Aboxed{
+  \nabla (\mathbf{u}\tran \mathbf{u})={}&2\mathbf{u}
+  }
+\end{align*}
+}
+
+\frame{
+\frametitle{Teorema de Lagrange}
+Agora busca-se o $\nabla f(\vec{x}_{0})$ derivamos coordenada a coordenada:
+
+\begin{align*}
+\mathbf{u}\tran \mathbf{S}\mathbf{u} 
+&= \begin{bmatrix} 
+       u_{1}, & u_{2}, & \dots, & u_{p} 
+   \end{bmatrix}_{1\times p}
+\begin{bmatrix}
+       \sigma^{2}_{11} & \sigma^{2}_{12} & \dots & \sigma^{2}_{1p}\\
+       \sigma^{2}_{21} & \sigma^{2}_{12} & \dots & \sigma^{2}_{2p}\\
+       \vdots & \vdots & \ddots & \vdots\\
+       \sigma^{2}_{p1} & \sigma^{2}_{p2} & \cdots & \sigma^{2}_{pp}
+   \end{bmatrix}_{p\times p}
+   \begin{bmatrix*}[c]
+       u_{1} \\ u_{2} \\  \vdots \\ u_{p}
+   \end{bmatrix*}_{p\times 1}
+   \end{align*}
+}
+
+\frame{
+\frametitle{Teorema de Lagrange}
+Então, iremos derivar coordenada a coordenada, mas se $\mathbf{u}\tran \mathbf{S}\mathbf{u}=\mathbf{u}\tran \mathbf{W}$, com $\mathbf{W}= \mathbf{S}\mathbf{u}$, precisamos aplicar a regra do produto em (0a), ou seja:
+\begin{align*}
+    \frac{\partial}{\partial \mathbf{u}}(\mathbf{u}\tran \mathbf{W}) & = \mathbf{u}\tran \, \frac{\partial \mathbf{W}}{\partial \mathbf{u}}+\mathbf{W}\tran \, \frac{\partial \mathbf{u}}{\partial \mathbf{u}}\\
+    \\
+    &= \mathbf{u}\tran \mathbf{S}+\mathbf{W}\tran \\
+    \\
+    &= \mathbf{u}\tran \mathbf{S}+\mathbf{u}\tran\mathbf{S}\tran \\
+    \\
+    &=\mathbf{u}\tran(\mathbf{S}+\mathbf{S}\tran ).
+\end{align*}
+}
+
+\frame{
+\frametitle{Teorema de Lagrange}
+Como $\mathbf{S}$ é matriz de variância-covariância, portanto ela é simétrica ($\mathbf{S}=\mathbf{S}\tran$), logo:
+\begin{gather*}
+\frac{\partial}{\partial u_{1}} (\mathbf{u}\tran \mathbf{S}\mathbf{u}) = 2\sum\limits_{j=1}^p{\sigma^{2}_{1j}u_{j}}\\
+\frac{\partial}{\partial u_{2}} (\mathbf{u}\tran \mathbf{S}\mathbf{u}) = 2\sum\limits_{j=1}^p{\sigma^{2}_{2j}u_{j}}\\
+    \vdots \\
+\frac{\partial}{\partial u_{p}} (\mathbf{u}\tran \mathbf{S}\mathbf{u}) = 2\sum\limits_{j=1}^p{\sigma^{2}_{pj}u_{j}} \\
+\boxed{\frac{\partial}{\partial u} (\mathbf{u}\tran \mathbf{S}\mathbf{u})  =2\mathbf{S}\mathbf{u}}
+\end{gather*}
+}
+
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    \textbf{UFA! Agora sim podemos seguir!}
+    \vspace{0.3cm}
+
+    $$\mathcal{L}(\mathbf{S},\mathbf{u}_{1},\lambda_{1})=\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{1}-\lambda_{1}(\mathbf{u}\tran_{1}\mathbf{u}_{1}-1),$$
+    
+    Diferenciando com respeito a $\mathbf{u}_{1}$, temos
+$$2\mathbf{S}_{X}\mathbf{u}_{1}- 2\lambda_{1} \mathbf{u}_{1}=0$$
+$$\mathbf{S}_{X}u_{1}= \lambda_{1} u_{1}$$
+ou seja, 
+$$(\mathbf{S}_{X}-\lambda_{1} \mathbf{I}_{p})\mathbf{u}_{1}=0,$$
+tal que $\mathbf{I}_{p}$ é a matriz identidade de dimensão $p \times p$. Então, $\lambda_{1}$ é um autovalor de $\mathbf{S}_{X}$ e $\mathbf{u}_{1}$ o seu autovetor correspondente. 
+}
+
+\frame{
+\frametitle{Autovalor: o nosso lambda\footnote{HOFFMAN, Kenneth; KUNZE, Ray. \textbf{Linear Algebra}, Engelewood Cliffs. 1961.}}
+A matriz $\:\mathbf{A}\in \mathbf{M}_{n \times n}(\mathbb{R}) \:$ possui
+um autovalor $\lambda \, \in \, \mathbb{C}$ se, e somente se, existe um vetor
+$\: \underbrace{\mathbf{e}}_{(n \times 1)}$ não nulo tal que,
+$\mathbf{A}\mathbf{e}\: = \:\lambda \mathbf{e} \;$. Nesse caso, dizemos que $\lambda$ é um
+autovalor associado ao autovetor
+$\;\mathbf{e}$. Portanto, o problema de encontrar autovalores de uma matriz se reduz na procura pelas raízes de um certo polinômio em $\lambda$, denominado polinômio característico. Mais explicitamente, 
+\begin{equation}
+\begin{aligned}
+\mathbf{A}\mathbf{e} = \lambda \mathbf{e} &\iff 
+\mathbf{A}\mathbf{e} - \lambda \mathbf{e} \: = \: 0 \\&\iff
+(\mathbf{A} - \lambda \mathbf{I})\mathbf{e} \: = \: 0
+\end{aligned}
+\end{equation}
+
+}
+
+\frame{
+\frametitle{Autovalor: o nosso lambda}
+\begin{equation*}
+\begin{aligned}
+(\mathbf{A} - \lambda \mathbf{I})\mathbf{e} \: = \: 0
+\end{aligned}
+\end{equation*}
+como $\mathbf{e}\neq 0$ o sistema $\PR{\mathbf{A}-\lambda \mathbf{I}}\mathbf{e}=0$ possui solução não nula se, e somente, se
+\begin{equation}
+    \begin{aligned}
+    \operatorname{det}(\mathbf{A} - \lambda \mathbf{I}) = 0
+\end{aligned}
+\end{equation}
+tal que:
+$\mathbf{A} = \: \lambda_{1}\mathbf{e}_{1}\mathbf{e}_{1}\tran\: + \: \lambda_{2}\mathbf{e}_{2}\mathbf{e}_{2}\tran \: + \: \cdots \: + \: \lambda_{k}\mathbf{e}_{k}\mathbf{e}_{k}\tran$\footnote{Conhecida como Decomposição Espectral, que pode ser escrita também como: $\sum_{i=1}^{k}\lambda_{i}\mathbf{e}_{i}\mathbf{e}_{i}\tran\: =\:\mathbf{P \mathbf{\Lambda} \mathbf{P}^{-1}}$, tal que $\mathbf{\Lambda}$ é uma matriz diagonal de autovalores de \textbf{A}. Por definição, uma matriz diagonal é uma matriz quadrada que possui todos os elementos acima e abaixo da diagonal principal nulos. }
+}
+
+\frame{
+\frametitle{Autovalor: o nosso lambda}
+\textbf{Definição:} Seja $V$ um espaço vetorial sobre o campo $F$ e $T$ um operador linear em $V$ tal que $T: V\rightarrow V$. Um \textbf{autovalor} de $\mathbf{T}$ é um escalar $\lambda$ em $F$ tal que existe um vetor \textbf{não-nulo}\footnote{O vetor nulo não pode estar no espaço nulo de $\mathbf{T}$. \textbf{Espaço Nulo} $\mathcal{N}(\mathbf{T})\in \mathrr{R}^{m}$: é o conjunto de todas as soluções para o sistema $Ax=0$. O núcleo de uma transformação linear ($Ker(\mathbf{T})$) é sinônimo, isto é, $Ker(\mathbf{T})=\{ \mathbf{e} \in V: \mathbf{T}\mathbf{e}=0\}$. Ambos se referem ao conjunto de vetores do domínio que são mapeados para o vetor nulo no contradomínio pela transformação linear.} $\mathbf{e} \in V$ com $\mathbf{T}\mathbf{e} = \lambda \mathbf{e}$. Se $\lambda$ é um autovalor de $\mathbf{T}$, então
+\begin{enumerate}
+    \item Qualquer $\mathbf{e}$ tal que $\mathbf{T}\mathbf{e} = \lambda \mathbf{e}$ é chamado de \textbf{autovetor} de $\mathbf{T}$ associado ao autovalor $\lambda$;
+    \item A coleção de todos os $\mathbf{e}$ tais que $\mathbf{T}\mathbf{e} = \lambda \mathbf{e}$ é chamada de \textbf{espaço característico associado} a $\lambda$.
+\end{enumerate}
+}
+
+
+\frame{
+\frametitle{Autovalor: o nosso lambda}
+\begin{block}{Autovalores:}
+    
+
+Os \textbf{autovalores} são frequentemente chamados: valores característico, raízes características, raízes latentes, valores próprios ou valores espectrais. 
+
+\end{block}
+}
+
+\frame{
+\frametitle{Autovalor: o nosso lambda}
+Se $\mathbf{T}$ é qualquer operador linear e $\lambda$ é qualquer escalar, o conjunto de vetores $\mathbf{e}$ tal que $\mathbf{T}\mathbf{e} = \lambda \mathbf{e}$ é um subespaço de $V$. 
+
+$$(\mathbf{T}-\lambda \mathbf{I}) \; \text{é não injetiva} \iff \exists \mathbf{v}_{1},\mathbf{v}_{2}:\mathbf{v}_{1} \neq \mathbf{v}_{2} \; \text{e} \; (\mathbf{T}-\lambda \mathbf{I}) \mathbf{v}_{1}=(\mathbf{T}-\lambda \mathbf{I}) \mathbf{v}_{2} $$
+$$\iff \exists \mathbf{x}: x \neq 0 \; \text{e} \; (\mathbf{T}-\lambda \mathbf{I})\mathbf{x}=0$$
+$$\iff (\mathbf{T}-\lambda \mathbf{I}) \;\text{é singular}$$
+$$\iff \text{det}(\mathbf{T}-\lambda \mathbf{I})=0$$
+
+}
+
+\frame{
+\frametitle{Autovalor: o nosso lambda}
+Se $(\mathbf{T}-\lambda \mathbf{I})$ é não-singular, note que em  
+$$ (\mathbf{T}-\lambda \mathbf{I})\mathbf{x}=0,\; \; \text{podemos multiplicar pela inversa}$$
+$$(\mathbf{T}-\lambda \mathbf{I})^{-1} (\mathbf{T}-\lambda \mathbf{I}) \mathbf{x} = (\mathbf{T}-\lambda \mathbf{I})^{-1}  \; 0$$
+$$ \mathbf{I}\mathbf{x}=0 \; \implies \; \mathbf{x}=0$$
+Exatamente o que não queremos.
+}
+
+\frame{
+\frametitle{Autovalor: o nosso lambda}
+\textbf{Teorema } Seja \(\mathbf{T}\) um operador linear em um espaço de dimensão finita \(V\) e $\lambda$ um escalar. As seguintes afirmações são equivalentes.
+\begin{enumerate}
+    \item[(i)] $\lambda$ é um valor característico de \(\mathbf{T}\).
+    \item[(ii)] O operador \((\mathbf{T} - \lambda \mathbf{I})\) é singular (não invertível).
+    \item[(iii)] \(\det(\mathbf{T} - \lambda \mathbf{I}) = 0\).
+\end{enumerate}
+
+O critério do determinante (iii) é muito importante, pois nos diz onde procurar os valores característicos de \(\mathbf{T}\). Como \(\det(\mathbf{T} - \lambda \mathbf{I})\) é um polinômio de grau \(n\) na variável $\lambda$, encontraremos os valores característicos como as raízes desse polinômio.
+
+}
+
+\frame{
+\frametitle{Autovalor: o nosso lambda}
+Se \(\mathcal{B}\) é qualquer base ordenada para \(V\) e \(\mathbf{A} = [T]_{\mathcal{B}}\), então \((\mathbf{T} - \lambda \mathbf{I})\) é inversível se e somente se a matriz \((\mathbf{A} - \lambda \mathbf{I})\) é inversível. De acordo com isso, fazemos a seguinte definição.
+
+\vspace{0.3cm}
+
+\textbf{Definição.} Se \(\mathbf{A}\) é uma matriz \(n \times n\) sobre o campo \(F\), um valor característico de \(\mathbf{A}\) em \(F\) é um escalar \(\lambda\) em \(F\) tal que a matriz \((\mathbf{A} - \lambda \mathbf{I})\) é singular (não invertível).
+
+\vspace{0.3cm}
+
+Uma vez que \(c\) é um valor característico de \(\mathbf{A}\) se e somente se \(\det(\mathbf{A} - c\mathbf{I}) = 0\), ou equivalentemente se e somente se \(\det(c\mathbf{I} - \mathbf{A}) = 0\).
+
+}
+
+\frame{
+\frametitle{Propriedades de autovetores de matrizes simétricas:}
+
+\begin{enumerate}
+    \item \textbf{Simetria:}
+    \begin{itemize}
+        \item Em uma matriz simétrica $A$, os autovetores correspondentes a diferentes autovalores são ortogonais entre si. 
+    \end{itemize}
+    
+    \item \textbf{Diagonalização:}
+    \begin{itemize}
+        \item Matrizes simétricas são diagonalizáveis, o que significa que podem ser decompostas na forma $A = PDP^{-1}$, onde $P$ é uma matriz formada pelos autovetores de $A$ e $D$ é uma matriz diagonal com os autovalores correspondentes.
+    \end{itemize}
+    
+    \item \textbf{Autovalores Reais:}
+    \begin{itemize}
+        \item Todos os autovalores de uma matriz simétrica são reais. 
+    \end{itemize}
+    
+    \item \textbf{Quantidade de Autovetores:}
+    \begin{itemize}
+        \item Se uma matriz simétrica tem dimensão $n$, então ela possui exatamente $n$ autovetores linearmente independentes.
+    \end{itemize}
+\end{enumerate}
+
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Para decidirmos qual dos $p$ autovetores produz $\mathbf{u}\tran_{1}$ de máxima variância, note que a quantidade a ser maximizada é
+$$\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{1}=\mathbf{u}\tran_{1}\lambda_{1} \mathbf{u}_{1}=\lambda_{1}\mathbf{u}\tran_{1} \mathbf{u}_{1}=\lambda_{1},$$
+assim, $\lambda_{1}$ deve ser o maior possível. Logo, $\mathbf{u}_{1}$ é o autovetor associado ao maior autovalor de $\mathbf{S}_{X}$, e $\text{Var}(\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{1})=\mathbf{u}\tran_{1}\lambda_{1} \mathbf{u}_{1}=\lambda_{1}$. Então, $\lambda_{1}=\text{Var}(\mathbf{w}_{1})>0$.
+
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Agora, para $k=2$, o segundo componente $\mathbf{u}\tran_{2}\mathbf{X}$, maximiza
+$\mathbf{u}\tran_{2}\mathbf{S}\mathbf{u}_{2}$ que deve ser ausente de correlação com $\mathbf{u}\tran_{1}\mathbf{X}$, ou equivalente a a $\text{cov}(\mathbf{u}\tran_{1}\mathbf{X},\mathbf{u}\tran_{2}\mathbf{X})=0$, onde $\text{cov}(x,y)$ denota a covariância entre as variáveis $x$ e $y$. Mas
+$$\text{cov}(\mathbf{u}\tran_{1}\mathbf{X},\mathbf{u}\tran_{2}\mathbf{X})=\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{2}=\mathbf{u}\tran_{2}\mathbf{S}_{X}\mathbf{u}_{1}=\mathbf{u}\tran_{2}\lambda_{1}\mathbf{u}\tran_{1}=\lambda_{1}\mathbf{u}\tran_{2}\mathbf{u}_{1}=\lambda_{1}\mathbf{u}\tran_{1}\mathbf{u}_{2}=0.$$ 
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Assim, cada dessas equações
+\begin{align*}
+\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{2}=0\\
+u\tran_{2}\mathbf{S}_{X}\mathbf{u}_{1}=0\\
+\mathbf{u}\tran_{1}\mathbf{u}_{2}=0\\
+\mathbf{u}\tran_{2}\mathbf{u}_{1}=0
+\end{align*}
+pode ser usada para indicar ausência de correlação entre $\mathbf{u}\tran_{1}\mathbf{X}$ e $\mathbf{u}\tran_{2}\mathbf{X}$.
+Assumimos igualmente a hipótese de normalização entre $\mathbf{u}\tran_{1}\mathbf{X}$ e $\mathbf{u}\tran_{2}\mathbf{X}$, a quantidade que deve ser maximizada será
+$$\mathcal{L}(\mathbf{S},\mathbf{u}_{1},\mathbf{u}_{2},\lambda_{2}, \phi)=\mathbf{u}\tran_{2}\mathbf{S}_{X}\mathbf{u}_{2}-\lambda_{2}(\mathbf{u}\tran_{2}\mathbf{u}_{2}-1)-\phi \mathbf{u}\tran_{2}\mathbf{u}_{1},$$
+onde $\lambda_{2}$ e $\phi$ são os multiplicadores de Lagrange.
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Diferenciando a expressão em relação a $\mathbf{u}_{2}$, temos
+$$\mathbf{S}_{X}\mathbf{u}_{2}- \lambda_{2} \mathbf{u}_{2}-\frac{\phi}{2} \mathbf{u}_{1}=0$$
+e multiplicando a equação por $\mathbf{u}\tran_{1}$ temos
+\begin{align*}
+\mathbf{u}\tran_{1}\mathbf{S}_{X}\mathbf{u}_{2}-\lambda_{2} \mathbf{u}\tran_{1}\mathbf{u}_{2}-\phi \mathbf{u}\tran_{1}\mathbf{u}_{1}=0\\
+0 \; - \; 0 \; - \phi 1 \; = \; 0,
+\end{align*}
+sendo que os dois primeiros termos são zero e $\mathbf{u}\tran_{1}\mathbf{u}_{1}=1$, temos $\phi=0$. 
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Além disso, $\mathbf{S}_{X}\mathbf{u}_{2}-\lambda_{2}\mathbf{u}_{2}=0$, ou equivalente a $(\mathbf{S}_{X}-\lambda_{2} \mathbf{I}_{p})\mathbf{u}_{2}=0$, então $\lambda_{2}=\text{Var}(\mathbf{w}_{2})$, e desde que os autovalores de $\mathbf{S}_{X}$ são distintos, $\lambda_{2}$ é o autovalor de $\mathbf{S}_{X}$, e $\mathbf{u}_{2}$ representa seu autovetor correspondente. 
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Esse processo pode ser repetido para $k=1,2,\dots,p$ alcançado os $p$ diferentes autovetores de $\mathbf{S}_{X}$ relativo aos seus autovalores $\lambda_{1},\lambda_{2},\dots,\lambda_{p},$ correspondentes. 
+
+Finalmente, a variância de cada Componente Principal será dada por $\text{Var}(\mathbf{u}_{k}\mathbf{X})=\lambda_{k}$ para $k=1,2,\dots, p$. Para encontrar os autovetores restantes usaremos o fato de que para cada $i \neq j$, $\mathbf{w}_{i}=\mathbf{u}\tran_{i}\mathbf{X}$ e $\mathbf{w}_{i}=\mathbf{u}\tran_{j}\mathbf{X}$ são ortogonais, então
+$$\text{Var}(\mathbf{w}_{i},\mathbf{w}_{j})=\mathbb{E}[\mathbf{u}\tran_{i}\mathbf{X}\mathbf{X}\tran \mathbf{u}_{j}]=\mathbf{u}\tran_{i}\mathbf{S}_{X}\mathbf{u}_{j}=0.$$
+
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    Usando indução, assumimos que $\mathbf{u}_{1}, \, \mathbf{u}_{2}, \, \dots, \, \mathbf{u}_{i-1}$ são os autovetores unitários de $\mathbf{S}_{X}$ associados com os maiores $i-1$ autovalores, e seja $\mathbf{u}_{i}$ o vetor que define o $i$-ésimo componente principal, $\mathbf{w}_{i}$. Então, $\mathbf{S}_{X}\mathbf{u}_{j}=\lambda_{j}\mathbf{u}_{j}$ para $j=1,2, \dots, i-1$ e $\mathbf{u}\tran_{i}\mathbf{S}_{X}\mathbf{u}_{j}=\lambda_{j}\mathbf{u}\tran_{i}\mathbf{u}_{j}=0$ para todo $j=1,2,\dots,i-1$. Desde que $\lambda_{j}>0$, temos que $\mathbf{u}\tran_{j}\mathbf{u}_{j}=0$ para todo $j=1,2,\dots,i-1$. Para computar $\mathbf{u}_{i}$, temos o Langrangiano
+
+$$\mathcal{L}(\mathbf{S},\mathbf{u}_{i},\mathbf{u}_{j},\lambda_{i}, \phi_{j})=\mathbf{u}\tran_{i}\mathbf{S}_{X}\mathbf{u}_{i}-\lambda_{i}(\mathbf{u}\tran_{i}\mathbf{u}_{i}-1)-\sum^{i-1}_{j=1}\phi_{j} \mathbf{u}\tran_{i}\mathbf{u}_{j}.$$
+
+
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+    As condições necessárias para que $(\mathbf{u}_{i},\lambda_{i}, \phi_{1},\dots,\phi_{j-1})$ seja máximo serão
+
+$$2\mathbf{S}_{X}\mathbf{u}_{i}+\sum^{i-1}_{j=1}\phi_{j}\mathbf{u}_{j}=2\lambda_{i}\mathbf{u}_{i}$$
+com $\mathbf{u}\tran_{i}\mathbf{u}_{i}=1$ e $\mathbf{u}\tran_{i}\mathbf{u}_{j}=0$, para $j=1,2,\dots, i-1$, de onde segue que para todo $j=1,2,\dots, i-1$ teremos $\mathbf{u}^{T}_{j}\mathbf{S}_{X}\mathbf{u}_{i}+\tfrac{\phi_{j}}{2}=\lambda_{j}\mathbf{u}\tran_{j}\mathbf{u}_{i}+\tfrac{\phi_{j}}{2}=\lambda_{i}\mathbf{u}\tran \mathbf{u}_{i}$, e então $\phi_{j}=2(\lambda_{j}-\lambda_{i})\mathbf{u}\tran_{j}\mathbf{u}_{i}=0$. Desde que o valor extremo associado é $\mathbf{u}\tran_{j}\mathbf{S}_{X}\mathbf{u}_{i}=\lambda_{i}=\text{Var}(w_{i})$, $u_{i}$ é autovetor de $\mathbf{S}_{X}$ restrito ao complemento ortogonal do span (Espaço gerado) $u_{1},u_{2},\dots,u_{i-1}$. 
+
+}
+
+\frame{
+    \frametitle{Componentes Principais: abordagem geométrica}
+   Desde que o valor extremo associado é $\mathbf{u}\tran_{j}\mathbf{S}_{X}\mathbf{u}_{i}=\lambda_{i}=\text{Var}(w_{i})$, $u_{i}$ é autovetor de $\mathbf{S}_{X}$ restrito ao complemento ortogonal do span (Espaço gerado) $u_{1},u_{2},\dots,u_{i-1}$. Desde que os autovetores de $\mathbf{S}_{X}$ são distintos, $\mathbf{u}_{i}$ é o autovetor associado de $\mathbf{S}_{X}$ com o $i$-ésimo maior autovalor.
+   \vspace{0.2cm}
+   Ainda, quando os autovalores de $\mathbf{S}_{X}$ são distintos, cada autovetor $\mathbf{u}_{i}$ será único, e portanto serão os componentes principais de $\mathbf{X}$.
+
+}
+
+\section{Considerações}
+
+\frame{
+\frametitle{Em resumo: notação Johnson & Wichern (2002)}
+A transformação linear do vetor $\:\mathbf{X}=[X_{1}\;,X_{2},\, \ldots,\;X_{p}]\;$ de variáveis correlacionadas, que possui matriz de variâncias-covariâncias, será transformado em novas variáveis não-correlacionadas $\:Y_{1},\;Y_{2},\, \ldots,\; Y_{p}$. As coordenadas dessas novas variáveis são descritas pelos vetores característicos $\;\vec{e}_{j}\;$ de $\:\mathbf{W}_{(p \times p)}\:$ usados na seguinte transformação:
+\begin{equation} \label{3.1.8}
+\underbrace{\mathbf{Y}}_{(p \times p)} \: = \quad
+\underbrace{\mathbf{W}^{t}}_{(p \times p)}
+\underbrace{\mathbf{X}}_{(p \times p)}\:;
+\end{equation}
+
+}
+
+
+\frame{
+\frametitle{Em resumo:}
+Sendo \textbf{Y} a matriz de componentes principais, \textbf{W} possui os autovetores e \textbf{R} é a matriz de correlações das variáveis em \textbf{X}. Finalmente, podemos obter \textbf{F}, que é a nova matriz de escores das observações. Com isso, o problema se resume em
+
+\begin{equation} \label{3.1.8}
+\underbrace{\mathbf{Y}}_{(\mathcolor{red}{m} \times p)} \: = \quad
+\underbrace{\mathbf{W}^{t}}_{( \mathcolor{red}{m} \times p )}
+\underbrace{\mathbf{R}}_{(p \times p)}\:;
+\end{equation}
+
+\begin{equation}\label{eq110}
+\underbrace{\mathbf{F}}_{(n \times \mathcolor{red}{m})} \: = \quad
+\underbrace{\mathbf{X}}_{(n \times p)}
+\underbrace{\mathbf{W}}_{(p \times \mathcolor{red}{m})}\: .
+\end{equation}
+}
+
+\frame{
+\frametitle{Em resumo: Propriedade 1}
+$\mathbf{W}_{j}\; = \; \mathbf{u}_{j}^{T}\mathbf{X}\;  = \; u_{j1}\mathbf{X}_{1}\; + \; u_{j1}\mathbf{X}_{2} \;+ \; \cdots \;+ \;u_{jp}\mathbf{X}_{p}\;,\; \; \forall \; \; j=1,2,\dots,p.$ 
+
+\vspace{0.3cm}
+Tal que
+
+\begin{block}
+
+$E(\mathbf{W}_{j})\; \; =\; \; \mathbf{u}_{j}^{T}.$
+\vspace{0.3cm}
+
+$\textrm{Var}(\mathbf{W}_{j})\; \; = \; \; \mathbf{u}_{j}^{T}\mathbf{\Sigma} \mathbf{u}_{j}\; =\;\lambda_{j}\;,\; \; \forall \; \; j\; = \; 1,\;2,\; \cdots,\; p.$
+\vspace{0.3cm}
+
+$\textrm{Cov}(\mathbf{W}_{j},\:\mathbf{W}_{k}) \; = \; \mathbf{u}_{j}^{T}\mathbf{\Sigma} \mathbf{u}_{k} \;  = \;0 \;, \; \; \forall \; j,k\;=\;1,\;2,\; \dots,\; p \; \; \text{e} \; \;j \neq  k.$
+\end{block}
+}
+
+\frame{
+\frametitle{Em resumo: Propriedade 2}
+
+A proporção da variância total de $\mathbf{X}$ que é explicada pela $j$-ésima componente principal é
+
+\begin{block}
+
+$\frac{\lambda_{j}}{\lambda_{1}\;+\; \lambda_{2}\;+\; \dots \; +\; \lambda_{p}} \;=\; \frac{\lambda_{j}}{\sum_{i=1}^{p}\lambda_{i}}\;=\; \frac{\lambda_{j}}{\text{Traço}(\mathbf{S})},\; \; \forall \; \; j \; = \; 1, \;2,\; \dots, \;p.$
+\end{block}    
+}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\end{document}
